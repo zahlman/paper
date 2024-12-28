@@ -1,0 +1,20 @@
+[project]
+name = "paper"
+version = "0.1.0"
+description = "the Python Application, Package and Environment wRangler"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Programming Language :: Python :: 3"
+]
+dependencies = [ ]
+license = {file = "LICENSE.txt"}
+
+[[project.authors]]
+name = "Karl Knechtel"
+email = "zahlman@proton.me"
+
+[project.urls]
+bugs = "https://github.com/zahlman/paper/issues"
+changelog = "https://github.com/zahlman/paper/blob/master/changelog.md"
+homepage = "https://github.com/zahlman/paper"
