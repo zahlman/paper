@@ -1,0 +1,4 @@
+#!/bin/sh
+me=`readlink -f "$0"`
+folder=`dirname "$me"`
+"$folder/python" "$folder/launch" "`basename \"$me\"`" "$@"
