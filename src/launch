@@ -1,22 +1,49 @@
 #!/usr/bin/env python
-import sys
-from time import time
-from pathlib import Path
-current_executable = Path(sys.executable).absolute()
-here = Path(__file__).parent.absolute()
-my_executable = here / 'python'
+# coding: utf-8
+import importlib, sys
 
-if current_executable != my_executable:
-    import subprocess
-    print([my_executable, *sys.argv])
-    sys.exit(subprocess.call([my_executable, *sys.argv]))
-import configparser
-p = configparser.ConfigParser()
-with open(here / '..' / 'entry_points.txt') as f:
-    p.read_file(f)
-module, colon, func = p['console_scripts'][sys.argv[1]].partition(':')
-sys.argv = sys.argv[2:]
-import importlib
-module = importlib.import_module(module)
-if colon:
-    getattr(module, func)()
+
+def here():
+    from pathlib import Path
+    return Path(__file__).parent.absolute()
+
+
+def check_python():
+    from pathlib import Path
+    current_executable = Path(sys.executable).absolute()
+    my_executable = here() / 'python'
+    if current_executable != my_executable:
+        import subprocess
+        result = subprocess.call([my_executable, *sys.argv])
+        sys.exit(result)
+
+
+def read_entry_points():
+    import configparser
+    p = configparser.ConfigParser()
+    with open(here() / '..' / 'entry_points.txt') as f:
+        p.read_file(f)
+    return dict(p)
+
+
+def parse_entry_point(eps, epname):
+    module, colon, func = eps['console_scripts'][epname].partition(':')
+    if colon and not func:
+        raise ValueError("function name may not be empty when provided")
+    return (module, func)
+
+
+def invoke_entry_point(module, func):
+    module = importlib.import_module(module)
+    if func:
+        getattr(module, func)()
+
+
+def main():
+    check_python()
+    progname, epname, *sys.argv = sys.argv
+    invoke_entry_point(*parse_entry_point(read_entry_points(), epname))
+
+
+if __name__ == '__main__':
+    main()
