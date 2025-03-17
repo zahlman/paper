@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 import importlib, sys
+from os.path import abspath as absolute, dirname as parent, join as joinpath
 
 
-def here():
-    from pathlib import Path
-    return Path(__file__).parent.absolute()
+def relative_to_here(*parts):
+    return joinpath(absolute(parent(__file__)), *parts)
 
 
 def check_python():
-    from pathlib import Path
-    current_executable = Path(sys.executable).absolute()
-    my_executable = here() / 'python'
-    if current_executable != my_executable:
+    my_executable = relative_to_here('python')
+    if my_executable != absolute(sys.executable):
         import subprocess
         result = subprocess.call([my_executable, *sys.argv])
         sys.exit(result)
@@ -21,7 +19,7 @@ def check_python():
 def read_entry_points():
     import configparser
     p = configparser.ConfigParser()
-    with open(here() / '..' / 'entry_points.txt') as f:
+    with open(relative_to_here('..', 'entry_points.txt')) as f:
         p.read_file(f)
     return dict(p)
 
