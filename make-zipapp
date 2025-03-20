@@ -5,20 +5,37 @@ from shutil import copy as copyfile, copytree
 from tempfile import TemporaryDirectory
 from zipapp import create_archive
 
-root = Path(__file__).parent
-result = root / 'paper.pyz'
-py = '/usr/bin/env python'
-python_tag = 'py3'
-paper_version = '0.1.0'
-wheel = f'paper-{paper_version}-{python_tag}-none-any.whl'
-app = f'dist/install-paper-{paper_version}-for-{python_tag}.pyz'
 
-with TemporaryDirectory() as env:
-    env = Path(env)
-    # The code from src will have been built into a wheel in dist/.
-    copyfile(root / 'dist' / wheel, env / wheel)
-    # Copy other vendored wheels.
-    copytree(root / 'wheels', env, dirs_exist_ok=True)
-    # Set up the bootstrap.
-    copyfile(root / 'install.py', env / '__main__.py')
-    create_archive(env, target=root / app, interpreter=py)
+def copy_wheel(src, dst, name, version, python_tag):
+    wheel_name = f'{name}-{version}-{python_tag}-none-any.whl'
+    dst = dst / 'cache' / f'{name}-{version}'
+    dst.mkdir(exist_ok=True)
+    copyfile(src / wheel_name, dst / wheel_name)
+
+
+def copy_wheels(src, dst, paper_version, rfbs_version, python_tag):
+    copytree(src / 'cache', dst / 'cache', dirs_exist_ok=True)
+    copy_wheel(src / 'dist', dst, 'paper', paper_version, python_tag)
+    copy_wheel(src / 'rfbs' / 'dist', dst, 'rfbs', rfbs_version, python_tag)
+
+
+def build_zipapp(src, dst, paper_version, rfbs_version, python_tag):
+    copy_wheels(src, dst, paper_version, rfbs_version, python_tag)
+    copyfile(src / 'install.py', dst / '__main__.py')
+
+
+def write_zipapp(src, dst, paper_version, python_tag, interpreter):
+    name = f'install-paper-{paper_version}-for-{python_tag}.pyz'
+    where = dst / 'dist' / name
+    create_archive(src, target=where, interpreter=interpreter)
+
+
+def main(paper_version, rfbs_version, python_tag, interpreter):
+    here = Path(__file__).parent
+    with TemporaryDirectory() as env:
+        build_zipapp(here, Path(env), paper_version, rfbs_version, python_tag)
+        write_zipapp(Path(env), here, paper_version, python_tag, interpreter)
+
+
+if __name__ == '__main__':
+    main('0.1.0', '0.1.0', 'py2.py3', '/usr/bin/env python')
