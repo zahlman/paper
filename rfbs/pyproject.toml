@@ -1,7 +1,7 @@
 [project]
-name = "paper"
+name = "rfbs"
 version = "0.1.0"
-description = "the Python Application, Package and Environment wRangler"
+description = "Resolve/Fetch/Build/Setup: API for the Paper package installer"
 readme = "README.md"
 classifiers = [
     "Development Status :: 1 - Planning",
@@ -18,9 +18,6 @@ email = "zahlman@proton.me"
 bugs = "https://github.com/zahlman/paper/issues"
 changelog = "https://github.com/zahlman/paper/blob/master/changelog.md"
 homepage = "https://github.com/zahlman/paper"
-
-[project.scripts]
-welcome = "paper.__main__:main"
 
 [build-system]
 requires = ["flit_core >=3.11,<4"]
