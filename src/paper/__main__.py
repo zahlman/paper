@@ -1,8 +1,4 @@
-_name = "PAPER - the Python Application, Package and Environment wRangler"
-
-
-def main():
-    print(f"Welcome to {_name}")
+from . import main
 
 
 if __name__ == '__main__':
