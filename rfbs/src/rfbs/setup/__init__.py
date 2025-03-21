@@ -44,7 +44,7 @@ def _get_destination(venv_root):
     return VenvDestination(paths, str(venv_root / 'bin' / 'python'), 'posix')
 
 
-def demo(source_path, venv_root):
+def setup_wheel(source_path, venv_root):
     metadata = { 'INSTALLER': b'paper 0.1.0' }
     with WheelFile.open(source_path) as source:
         install(source, _get_destination(venv_root), metadata)
