@@ -8,13 +8,13 @@ from zipapp import create_archive
 
 def copy_wheel(src, dst, name, version, python_tag):
     wheel_name = f'{name}-{version}-{python_tag}-none-any.whl'
-    dst = dst / 'cache' / f'{name}-{version}'
+    dst = dst / 'paper' / f'{name}-{version}'
     dst.mkdir(exist_ok=True)
     copyfile(src / wheel_name, dst / wheel_name)
 
 
 def copy_wheels(src, dst, paper_version, rfbs_version, python_tag):
-    copytree(src / 'cache', dst / 'cache', dirs_exist_ok=True)
+    copytree(src / 'cache', dst / 'paper', dirs_exist_ok=True)
     copy_wheel(src / 'dist', dst, 'paper', paper_version, python_tag)
     copy_wheel(src / 'rfbs' / 'dist', dst, 'rfbs', rfbs_version, python_tag)
 

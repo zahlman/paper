@@ -1,42 +1,21 @@
 from pathlib import Path
-from sys import argv, version_info
+import sys
 from venv import create as make_venv
 from zipfile import ZipFile
 
-
-root = Path.home() / '.local/paper'
-here = Path(argv[0])
-major, minor = version_info.major, version_info.minor
-env_folder = root / 'env'
-lib_folder = env_folder / f'lib/python{major}.{minor}/site-packages'
-bin_folder = env_folder / 'bin'
-
-
-def hardlink_tree(dst, src):
-    if dst.exists(follow_symlinks=False):
-        raise RuntimeError(f"destination '{dst}' unexpectedly already existed")
-    if src.is_file():
-        dst.hardlink_to(src)
-    elif src.is_dir():
-        dst.mkdir()
-        for contents in src.iterdir():
-            hardlink_tree(dst / contents.name, contents)
-    else:
-        raise RuntimeError(f"source '{src}' unexpectedly not a file or folder")
-
-
-make_venv(root / 'env', symlinks=True)
-with ZipFile(here) as me:
+# Unpack the cache/ folder from the wheel into a user cache directory,
+# then find the `paper` wheel in that cache, put it on `sys.path`, and
+# switch to its code.
+dst = Path.home() / '.cache'
+if (dst / 'paper').exists():
+    # Better safe than sorry, for now.
+    raise IOError('Paper cache already found')
+with ZipFile(Path(sys.argv[0])) as me:
     for name in me.namelist():
-        if not name.endswith('.whl'):
-            continue
-        me.extract(name, root / 'wheels')
-        with ZipFile(root / 'wheels' / name) as wheel:
-            wheel_folder = root / 'files' / name.removesuffix('.whl')
-            wheel.extractall(wheel_folder)
-            for folder in wheel_folder.iterdir():
-                hardlink_tree(lib_folder / folder.name, folder)
-
-
-# TODO: put an executable wrapper in ~/.local/paper/env/bin
-# and symlink it in ~/.local/bin
+        if name != '__main__.py':
+            me.extract(name, dst)
+wheel = dst / 'paper/paper-0.1.0/paper-0.1.0-py2.py3-none-any.whl'
+sys.path.insert(0, str(wheel))
+import paper
+print('paper location:', paper.__file__)
+paper.main()
