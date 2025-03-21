@@ -12,10 +12,11 @@ if (dst / 'paper').exists():
     raise IOError('Paper cache already found')
 with ZipFile(Path(sys.argv[0])) as me:
     for name in me.namelist():
-        if name != '__main__.py':
-            me.extract(name, dst)
-wheel = dst / 'paper/paper-0.1.0/paper-0.1.0-py2.py3-none-any.whl'
-sys.path.insert(0, str(wheel))
+        if name == '__main__.py':
+            continue
+        if name.endswith('.whl'):
+            sys.path.insert(0, str(dst / name))
+        me.extract(name, dst)
 import paper
 print('paper location:', paper.__file__)
 paper.main()
