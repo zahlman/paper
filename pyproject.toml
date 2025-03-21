@@ -20,7 +20,8 @@ changelog = "https://github.com/zahlman/paper/blob/master/changelog.md"
 homepage = "https://github.com/zahlman/paper"
 
 [project.scripts]
-welcome = "paper.__main__:main"
+# This is mainly for testing at the moment.
+welcome = "paper:welcome"
 
 [build-system]
 requires = ["flit_core >=3.11,<4"]

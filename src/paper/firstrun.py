@@ -1,7 +1,7 @@
 from venv import create as make_venv
 from pathlib import Path
 from rfbs.setup import setup_wheel
-from . import main as welcome
+from . import welcome
 
 
 def wheels(where):
