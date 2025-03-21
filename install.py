@@ -17,6 +17,5 @@ with ZipFile(Path(sys.argv[0])) as me:
         if name.endswith('.whl'):
             sys.path.insert(0, str(dst / name))
         me.extract(name, dst)
-import paper
-print('paper location:', paper.__file__)
-paper.main()
+import paper.firstrun
+paper.firstrun.main()
