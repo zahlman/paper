@@ -14,7 +14,7 @@ _bootstrap_wheels = [
 
 _paper_packages = [
     # All packages to install the first time.
-    ('paper', '0.1.0'),
+    ('paper-ui', '0.1.0'),
     ('rfbs', '0.1.0'),
     ('installer', '0.7.0'),
     ('resolvelib', '1.1.0'),

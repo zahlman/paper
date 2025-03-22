@@ -6,8 +6,13 @@ from tempfile import TemporaryDirectory
 from zipapp import create_archive
 
 
+def _normalize(name):
+    # Convert PyPI distribution name to wheel name-component.
+    return name.replace('-', '_')
+
+
 def copy_wheel(src, dst, name, version, python_tag):
-    wheel_name = f'{name}-{version}-{python_tag}-none-any.whl'
+    wheel_name = f'{_normalize(name)}-{version}-{python_tag}-none-any.whl'
     dst = dst / 'paper' / f'{name}-{version}'
     dst.mkdir(exist_ok=True)
     copyfile(src / wheel_name, dst / wheel_name)
@@ -15,7 +20,7 @@ def copy_wheel(src, dst, name, version, python_tag):
 
 def copy_wheels(src, dst, paper_version, rfbs_version, python_tag):
     copytree(src / 'cache', dst / 'paper', dirs_exist_ok=True)
-    copy_wheel(src / 'dist', dst, 'paper', paper_version, python_tag)
+    copy_wheel(src / 'dist', dst, 'paper-ui', paper_version, python_tag)
     copy_wheel(src / 'rfbs' / 'dist', dst, 'rfbs', rfbs_version, python_tag)
 
 

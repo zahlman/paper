@@ -1,5 +1,5 @@
 [project]
-name = "paper"
+name = "paper-ui"
 version = "0.1.0"
 description = "the Python Application, Package and Environment wRangler"
 readme = "README.md"
@@ -21,7 +21,7 @@ homepage = "https://github.com/zahlman/paper"
 
 [project.scripts]
 # This is mainly for testing at the moment.
-welcome = "paper:welcome"
+welcome = "paper_ui:welcome"
 
 [build-system]
 requires = ["flit_core >=3.11,<4"]
