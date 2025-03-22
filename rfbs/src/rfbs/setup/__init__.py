@@ -1,5 +1,5 @@
 from pathlib import Path
-from installer import destinations, install, sources
+from .installer import destinations, install, sources
 VenvDestination = destinations.SchemeDictionaryDestination
 WheelFile = sources.WheelFile
 

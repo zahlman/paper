@@ -7,7 +7,6 @@ from zipfile import ZipFile
 _bootstrap_wheels = [
     # Wheels whose code is needed for the initial install.
     # Most important last.
-    'installer-0.7.0/installer-0.7.0-py3-none-any.whl',
     'rfbs-0.1.0/rfbs-0.1.0-py2.py3-none-any.whl',
 ]
 
@@ -16,7 +15,6 @@ _paper_packages = [
     # All packages to install the first time.
     ('paper-ui', '0.1.0'),
     ('rfbs', '0.1.0'),
-    ('installer', '0.7.0'),
     ('resolvelib', '1.1.0'),
 ]
 
