@@ -6,13 +6,10 @@ from tempfile import TemporaryDirectory
 from zipapp import create_archive
 
 
-def _normalize(name):
-    # Convert PyPI distribution name to wheel name-component.
-    return name.replace('-', '_')
-
-
 def copy_wheel(src, dst, name, version, python_tag):
-    wheel_name = f'{_normalize(name)}-{version}-{python_tag}-none-any.whl'
+    # Convert PyPI distribution name to wheel name-component.
+    name = name.replace('-', '_')
+    wheel_name = f'{name}-{version}-{python_tag}-none-any.whl'
     dst = dst / 'paper' / f'{name}-{version}'
     dst.mkdir(exist_ok=True)
     copyfile(src / wheel_name, dst / wheel_name)

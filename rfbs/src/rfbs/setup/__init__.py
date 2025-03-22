@@ -63,10 +63,20 @@ def _find_distribution(where):
             return item
 
 
+def _folder_for(name, version):
+    # Normalize distribution name.
+    # This allows specifying the name as it appears on PyPI, while having the
+    # cache use a normalized name.
+    # This is useful since it disambiguates folder names in the cache:
+    # the first hyphen must separate the name from the version.
+    name = name.replace('-', '_')
+    return f'{name}-{version}'
+
+
 def setup_from_cache(name, version, venv_root, *, cache=None, fetch=True):
     if cache is None:
         cache = _default_cache()
-    distribution = _find_distribution(cache / f'{name}-{version}')
+    distribution = _find_distribution(cache / _folder_for(name, version))
     if distribution is None:
         # TODO: fetch the distribution if permitted.
         raise ValueError("couldn't find a distribution")
