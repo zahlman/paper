@@ -40,4 +40,4 @@ def main(paper_version, rfbs_version, python_tag, interpreter):
 
 
 if __name__ == '__main__':
-    main('0.1.0', '0.1.0', 'py2.py3', '/usr/bin/env python')
+    main('0.1.0', '0.1.0', 'py3', '/usr/bin/env python')

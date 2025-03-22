@@ -7,7 +7,7 @@ from zipfile import ZipFile
 _bootstrap_wheels = [
     # Wheels whose code is needed for the initial install.
     # Most important last.
-    'rfbs-0.1.0/rfbs-0.1.0-py2.py3-none-any.whl',
+    'rfbs-0.1.0/rfbs-0.1.0-py3-none-any.whl',
 ]
 
 

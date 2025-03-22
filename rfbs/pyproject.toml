@@ -9,6 +9,7 @@ classifiers = [
 ]
 dependencies = [ ]
 license = {file = "LICENSE.txt"}
+requires-python = ">= 3.5"
 
 [[project.authors]]
 name = "Karl Knechtel"
