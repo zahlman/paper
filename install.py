@@ -28,11 +28,11 @@ def _cache_folder():
 
 
 def _unpack_cache(where):
-    with ZipFile(Path(sys.argv[0])) as me:
+    with ZipFile(str(Path(sys.argv[0]))) as me:
         for name in me.namelist():
             if not name.startswith('paper/'):
                 continue
-            me.extract(name, where)
+            me.extract(name, str(where))
 
 
 def _fix_sys_path(paper_cache):

@@ -82,10 +82,12 @@ def _make(env, base):
     # TODO: use the current Python and adapt the result to the specified
     # Python (this way should support pre-3.x environments).
     # TODO: custom environment creation to facilitate relocatable venvs.
+    env = str(Path(env))
+    base = str(Path(base))
     if base == sys.executable: # fast path
-        venv.create(Path(env), symlinks=True)
+        venv.create(env, symlinks=True)
     else:
-        subprocess.call([Path(base), '-m', 'venv', '--without-pip', Path(env)])
+        subprocess.call([base, '-m', 'venv', '--without-pip', env])
 
 
 def _check_python(versions, base_python):

@@ -8,7 +8,7 @@ def get(url, **headers):
 
 def package_info(name):
     json_mime = 'application/vnd.pypi.simple.v1+json'
-    with get(f'https://pypi.org/simple/{name}', accept=json_mime) as data:
+    with get('https://pypi.org/simple/' + name, accept=json_mime) as data:
         return json.load(data)
 
 
@@ -28,12 +28,12 @@ def _folder_and_file(name, version, *tags):
         parts = tags_to_parts(*tags)
         return tags[0], '-'.join([name, version, *parts]) + '.whl'
     else: # sdist
-        return 'source', f'{name}-{version}.tar.gz'
+        return 'source', '{}-{}.tar.gz'.format(name, version)
 
 
 def download(name, version, *tags):
-    host = 'https://files.pythonhosted.org'
+    prefix = 'https://files.pythonhosted.org/packages'
     folder, filename = _folder_and_file(name, version, *tags)
-    url = f'{host}/packages/{folder}/{name[0]}/{name}/{filename}'
+    url = '{}/{}/{}/{}/{}'.format(prefix, folder, name[0], name, filename)
     with get(url) as data, open(filename, 'wb') as f:
         f.write(data.read())

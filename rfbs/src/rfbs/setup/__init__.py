@@ -29,15 +29,17 @@ def _compute_paths(root, interpreter, home):
     # but we need to grok other venvs besides the one where Paper is installed.
     # Therefore, we reproduce its logic here.
     venv_lib = root / 'lib' / python_name
+    # `installer` uses `os.path.join` on these values, which fails for Path
+    # instances on 3.5. So we explicitly convert back to str.
     return {
-        'stdlib': python_prefix / 'lib' / python_name,
-        'platstdlib': venv_lib,
-        'platlib': venv_lib / 'site-packages',
-        'purelib': venv_lib / 'site-packages',
-        'include': python_prefix / 'include' / python_name,
-        'platinclude': python_prefix / 'include' / python_name,
-        'scripts': root / 'bin',
-        'data': root 
+        'stdlib': str(python_prefix / 'lib' / python_name),
+        'platstdlib': str(venv_lib),
+        'platlib': str(venv_lib / 'site-packages'),
+        'purelib': str(venv_lib / 'site-packages'),
+        'include': str(python_prefix / 'include' / python_name),
+        'platinclude': str(python_prefix / 'include' / python_name),
+        'scripts': str(root / 'bin'),
+        'data': str(root)
     }
 
 
@@ -53,7 +55,7 @@ def _get_destination(venv_root):
 
 def setup_wheel(source_path, venv_root):
     metadata = { 'INSTALLER': b'paper 0.1.0' }
-    with WheelFile.open(source_path) as source:
+    with WheelFile.open(str(source_path)) as source:
         install(source, _get_destination(venv_root), metadata)
 
 
@@ -77,7 +79,7 @@ def _folder_for(name, version):
     # This is useful since it disambiguates folder names in the cache:
     # the first hyphen must separate the name from the version.
     name = name.replace('-', '_')
-    return f'{name}-{version}'
+    return '{}-{}'.format(name, version)
 
 
 def setup_from_cache(name, version, venv_root, *, cache=None, fetch=True):
