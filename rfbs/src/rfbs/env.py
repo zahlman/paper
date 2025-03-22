@@ -93,7 +93,7 @@ def _check_python(versions, base_python):
         raise EnvError("Environment exists, but doesn't include this Python")
 
 
-def create(path, *, base_python):
+def create(path, *, base_python=sys.executable):
     exists, virtual, versions = _inspect(Path(path))
     if exists:
         raise EnvError("Environment already exists; can't create it")
