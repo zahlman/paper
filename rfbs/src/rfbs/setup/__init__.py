@@ -10,9 +10,16 @@ def _parse_config_line(line):
 
 
 def _parse_config(path):
-    with open(path / 'pyvenv.cfg') as f:
+    with open(str(path / 'pyvenv.cfg')) as f:
         config = dict(map(_parse_config_line, f))
-    return Path(config['executable']), Path(config['home'])
+    home = Path(config['home'])
+    try:
+        interpreter = Path(config['executable'])
+    except KeyError: # Make a best guess (needed for <=3.10)
+        version = config['version'].split('.')
+        executable_name = 'python' + '.'.join(version[:2])
+        interpreter = home / executable_name
+    return interpreter, home
 
 
 def _compute_paths(root, interpreter, home):
