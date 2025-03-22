@@ -48,3 +48,26 @@ def setup_wheel(source_path, venv_root):
     metadata = { 'INSTALLER': b'paper 0.1.0' }
     with WheelFile.open(source_path) as source:
         install(source, _get_destination(venv_root), metadata)
+
+
+def _default_cache():
+    # In the future, this may involve platformdirs, reading a config file etc.
+    return Path.home() / '.cache' / 'paper'
+
+
+def _find_distribution(where):
+    # In the future this may find an sdist, or have to choose between wheels
+    # according to platform info. It may also return an unpacked cache folder.
+    for item in where.iterdir():
+        if item.suffix == '.whl':
+            return item
+
+
+def setup_from_cache(name, version, venv_root, *, cache=None, fetch=True):
+    if cache is None:
+        cache = _default_cache()
+    distribution = _find_distribution(cache / f'{name}-{version}')
+    if distribution is None:
+        # TODO: fetch the distribution if permitted.
+        raise ValueError("couldn't find a distribution")
+    setup_wheel(distribution, venv_root)
