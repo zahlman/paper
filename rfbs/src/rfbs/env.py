@@ -1,7 +1,7 @@
 from collections import namedtuple
 from enum import Enum
 from pathlib import Path
-import sys
+import subprocess, sys, venv
 
 
 _my_path = Path(sys.executable).resolve()
@@ -82,8 +82,10 @@ def _make(env, base):
     # TODO: use the current Python and adapt the result to the specified
     # Python (this way should support pre-3.x environments).
     # TODO: custom environment creation to facilitate relocatable venvs.
-    import subprocess
-    subprocess.call([Path(base), '-m', 'venv', '--without-pip', Path(env)])
+    if base == sys.executable: # fast path
+        venv.create(Path(env), symlinks=True)
+    else:
+        subprocess.call([Path(base), '-m', 'venv', '--without-pip', Path(env)])
 
 
 def _check_python(versions, base_python):
