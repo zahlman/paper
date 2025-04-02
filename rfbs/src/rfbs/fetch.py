@@ -31,9 +31,11 @@ def _folder_and_file(name, version, *tags):
         return 'source', '{}-{}.tar.gz'.format(name, version)
 
 
-def download(name, version, *tags):
+def download(into, name, version, *tags):
     prefix = 'https://files.pythonhosted.org/packages'
     folder, filename = _folder_and_file(name, version, *tags)
     url = '{}/{}/{}/{}/{}'.format(prefix, folder, name[0], name, filename)
-    with get(url) as data, open(filename, 'wb') as f:
-        f.write(data.read())
+    destination = into / filename
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with get(url) as data:
+        destination.write_bytes(data.read())
