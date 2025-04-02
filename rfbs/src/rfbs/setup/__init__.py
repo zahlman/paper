@@ -93,7 +93,7 @@ def _unpacked_wheel_path(folder, tags):
     return folder / '-'.join(('wheel', *_tags()))
 
 
-def _find_unpacked(folder):
+def _find_unpacked(folder, name, version):
     candidate = _unpacked_wheel_path(folder, _tags())
     return candidate if candidate.exists() else None
 
@@ -102,7 +102,7 @@ def _wheel_name(name, version, tags):
     return '-'.join((name, version, *tags)) + '.whl'
 
 
-def _unpack_wheel_for(folder, name, version):
+def _unpack_from_cache(folder, name, version):
     # TODO: search for appropriate wheel tags
     candidate = folder / _wheel_name(name, version, _tags())
     if not candidate.exists():
@@ -112,24 +112,28 @@ def _unpack_wheel_for(folder, name, version):
     return folder / unpack_path
 
 
-def _fetch_and_unpack_wheel(folder, name, version):
+def _fetch_then_unpack(folder, name, version):
     download(folder, name, version, *_tags())
-    return _unpack_wheel_for(folder, name, version)
+    return _unpack_from_cache(folder, name, version)
+
+
+def _try_methods(methods, args, failure):
+    results = (m(*args) for m in methods)
+    successes = (r for r in results if r is not None)
+    try:
+        return next(successes)
+    except StopIteration:
+        raise ValueError(failure)
 
 
 def _ensure_distribution(folder, name, version, fetch):
-    candidate = _find_unpacked(folder)
-    if candidate:
-        return candidate
-    candidate = _unpack_wheel_for(folder, name, version)
-    if candidate:
-        return candidate
-    if not fetch:
-        raise ValueError("Wheel not in cache")
-    candidate = _fetch_and_unpack_wheel(folder, name, version)
-    if candidate:
-        return candidate
-    raise ValueError("Wheel couldn't be downloaded")
+    if fetch:
+        methods = (_find_unpacked, _unpack_from_cache, _fetch_then_unpack)
+        failure = "Wheel couldn't be downloaded"
+    else:
+        methods = (_find_unpacked, _unpack_from_cache)
+        failure = "Wheel not in cache"
+    return _try_methods(methods, (folder, name, version), failure)
 
 
 def _setup_unpacked(distribution, root):
