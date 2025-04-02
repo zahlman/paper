@@ -1,5 +1,7 @@
 from pathlib import Path
+from ..fetch import download
 from .installer import destinations, install, sources
+from .unpack import unpack_wheel
 VenvDestination = destinations.SchemeDictionaryDestination
 WheelFile = sources.WheelFile
 
@@ -72,21 +74,75 @@ def _find_distribution(where):
             return item
 
 
-def _folder_for(name, version):
+def _folder_for(cache, name, version):
     # Normalize distribution name.
-    # This allows specifying the name as it appears on PyPI, while having the
-    # cache use a normalized name.
+    # This allows specifying the name as it appears on PyPI, while having
+    # the cache use a normalized name.
     # This is useful since it disambiguates folder names in the cache:
     # the first hyphen must separate the name from the version.
     name = name.replace('-', '_')
-    return '{}-{}'.format(name, version)
+    return cache / name / version
 
 
-def setup_from_cache(name, version, venv_root, *, cache=None, fetch=True):
+def _tags():
+    # TODO
+    return ('py2.py3', 'none', 'any')
+
+
+def _unpacked_wheel_path(folder, tags):
+    return folder / '-'.join(('wheel', *_tags()))
+
+
+def _find_unpacked(folder):
+    candidate = _unpacked_wheel_path(folder, _tags())
+    return candidate if candidate.exists() else None
+
+
+def _wheel_name(name, version, tags):
+    return '-'.join((name, version, *tags)) + '.whl'
+
+
+def _unpack_wheel_for(folder, name, version):
+    # TODO: search for appropriate wheel tags
+    candidate = folder / _wheel_name(name, version, _tags())
+    if not candidate.exists():
+        return None
+    unpack_path = _unpacked_wheel_path(folder, _tags())
+    unpack_wheel(candidate, unpack_path)
+    return folder / unpack_path
+
+
+def _fetch_and_unpack_wheel(folder, name, version):
+    download(folder, name, version, *_tags())
+    return _unpack_wheel_for(folder, name, version)
+
+
+def _ensure_distribution(folder, name, version, fetch):
+    candidate = _find_unpacked(folder)
+    if candidate:
+        return candidate
+    candidate = _unpack_wheel_for(folder, name, version)
+    if candidate:
+        return candidate
+    if not fetch:
+        raise ValueError("Wheel not in cache")
+    candidate = _fetch_and_unpack_wheel(folder, name, version)
+    if candidate:
+        return candidate
+    raise ValueError("Wheel couldn't be downloaded")
+
+
+def _setup_unpacked(distribution, root):
+    # hard-link main package files
+    # copy .dist-info and .data segments (they may need to be writable)
+    # make script wrappers
+    # invoke `compileall` as appropriate
+    ...
+
+
+def setup_from_cache(root, name, version, cache=None, fetch=True):
     if cache is None:
         cache = _default_cache()
-    distribution = _find_distribution(cache / _folder_for(name, version))
-    if distribution is None:
-        # TODO: fetch the distribution if permitted.
-        raise ValueError("couldn't find a distribution")
-    setup_wheel(distribution, venv_root)
+    folder = _folder_for(cache, name, version)
+    distribution = _ensure_distribution(folder, name, version, fetch)
+    _setup_unpacked(distribution, root)
