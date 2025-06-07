@@ -15,6 +15,11 @@ def _visit(process_folder, process_file, src, dst, onerror):
             yield path / f
 
 
+# A folder processor to do nothing but ensure recursing into folders.
+def recurse_into_folders(src, dst):
+    return True
+
+
 # Process a tree of files and folders (Visitor pattern).
 #
 # process_folder -> an operation to perform on each folder path.
