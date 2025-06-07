@@ -11,6 +11,7 @@ _my_version = sys.version_info
 # Is there something at this path?
 # Is it a folder representing a valid Python virtual environment?
 # What versions of Python does it contain?
+# (The 'versions' map from interpreter path to interpreter version.)
 EnvStatus = namedtuple('EnvStatus', ('exists', 'virtual', 'versions'))
 
 
@@ -52,17 +53,33 @@ def _version(path):
     return _my_version if path == _my_path else _parse(_query(path))
 
 
+def _name_for_version(version):
+    major, minor, *_ = version
+    return f'python{major}.{minor}'
+
+
+def _normalize_cfg(config):
+    try:
+        config['version'] = _version_tuple(config['version'])
+        config['home'] = Path(config['home'])
+    except KeyError:
+        raise ValueError
+    try:
+        config['executable'] = Path(config['executable'])
+    except KeyError:
+        # Make a best guess (needed for <= 3.10)
+        name = _name_for_version(config['version'])
+        config['executable'] = config['home'] / name
+    config['executable'] = config['executable'].resolve()
+
+
 def _parse_pyvenv_cfg(text):
     split = [l.partition('=') for l in text.splitlines()]
     if not all(_ for k, _, v in split):
         raise ValueError
     config = {k.strip(): v.strip() for k, _, v in split}
-    try:
-        executable, version = config['executable'], config['version']
-    except KeyError:
-        raise ValueError
-    versions = {Path(executable).resolve(): _version_tuple(version)}
-    return EnvStatus(True, True, versions)
+    _normalize_cfg(config)
+    return config
 
 
 def _get_base_pythons(bin_path):
@@ -73,9 +90,10 @@ def _inspect(env_path):
     if not env_path.exists():
         return EnvStatus(False, False, {})
     try:
-        return _parse_pyvenv_cfg((env_path / 'pyvenv.cfg').read_text())
+        config = _parse_pyvenv_cfg((env_path / 'pyvenv.cfg').read_text())
     except (FileNotFoundError, IsADirectoryError, ValueError):
         return EnvStatus(True, False, _get_base_pythons(env_path / 'bin'))
+    return EnvStatus(True, True, {config['executable']: config['version']})
 
 
 def _make(env, base):
