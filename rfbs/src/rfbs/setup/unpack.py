@@ -30,17 +30,13 @@ def _unpack_wheel_safe(archive, where):
         archive.extract(path, where)
 
 
-def _move_contents(src, dst):
-    # shutil.move will recurse, but we want to iterate one level down.
-    # That will leave behind the temporary directory for the context manager
-    # to clean up, and avoid an extra folder at the destination.
-    for item in src.iterdir():
-        move(item, dst)
-
-
 def unpack_wheel(src, dst):
     with ZipFile(src) as archive, TemporaryDirectory() as td:
         _unpack_wheel_safe(archive, td)
         # If there were no errors, move to the real destination.
         # There isn't really a sane way to recover from an error in this part.
-        _move_contents(Path(td), dst)
+        # shutil.move will recurse, but we want to iterate one level down.
+        # That will leave behind the temporary directory for the context
+        # manager to clean up, and avoid an extra folder at the destination.
+        for item in Path(td).iterdir():
+            move(item, dst)
