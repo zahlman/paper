@@ -138,3 +138,28 @@ def verify(path, *, base_python=None):
     if not exists:
         raise EnvError("Environment missing")
     _check_python(versions, base_python)
+
+
+def install_paths(path):
+    root = Path(path).resolve()
+    status = _inspect(root)
+    if not (status.exists and status.virtual):
+        raise EnvError("Not a virtual environment")
+    # The `sysconfig` module can only tell us about the current running Python,
+    # but we need to grok other venvs besides the one where Paper is installed.
+    # Therefore, we reproduce its logic here.
+    # There should be exactly one version in the dictionary.
+    [[interpreter, version]] = status.versions.items()
+    python_prefix = interpreter.parent.parent
+    python_name = _name_for_version(version)
+    venv_lib = root / 'lib' / python_name
+    return {
+        'stdlib': python_prefix / 'lib' / python_name,
+        'platstdlib': venv_lib,
+        'platlib': venv_lib / 'site-packages',
+        'purelib': venv_lib / 'site-packages',
+        'include': python_prefix / 'include' / python_name,
+        'platinclude': python_prefix / 'include' / python_name,
+        'scripts': root / 'bin',
+        'data': root
+    }
