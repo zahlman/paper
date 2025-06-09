@@ -10,19 +10,18 @@ def copy_wheel(src, dst, name, version, python_tag):
     # Convert PyPI distribution name to wheel name-component.
     name = name.replace('-', '_')
     wheel_name = f'{name}-{version}-{python_tag}-none-any.whl'
-    dst = dst / 'paper' / f'{name}-{version}'
     dst.mkdir(exist_ok=True)
     copyfile(src / wheel_name, dst / wheel_name)
 
 
 def copy_wheels(src, dst, paper_version, rfbs_version, python_tag):
-    copytree(src / 'cache', dst / 'paper', dirs_exist_ok=True)
+    copytree(src / 'bootstrap', dst, dirs_exist_ok=True)
     copy_wheel(src / 'dist', dst, 'paper-ui', paper_version, python_tag)
     copy_wheel(src / 'rfbs' / 'dist', dst, 'rfbs', rfbs_version, python_tag)
 
 
 def build_zipapp(src, dst, paper_version, rfbs_version, python_tag):
-    copy_wheels(src, dst, paper_version, rfbs_version, python_tag)
+    copy_wheels(src, dst / 'wheels', paper_version, rfbs_version, python_tag)
     copyfile(src / 'install.py', dst / '__main__.py')
 
 
