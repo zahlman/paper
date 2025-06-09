@@ -16,7 +16,7 @@ def copy_wheel(src, dst, name, version, python_tag):
 
 def copy_wheels(src, dst, paper_version, rfbs_version, python_tag):
     copytree(src / 'bootstrap', dst, dirs_exist_ok=True)
-    copy_wheel(src / 'dist', dst, 'paper-ui', paper_version, python_tag)
+    copy_wheel(src / 'paper_ui' / 'dist', dst, 'paper-ui', paper_version, python_tag)
     copy_wheel(src / 'rfbs' / 'dist', dst, 'rfbs', rfbs_version, python_tag)
 
 
@@ -27,8 +27,9 @@ def build_zipapp(src, dst, paper_version, rfbs_version, python_tag):
 
 def write_zipapp(src, dst, paper_version, python_tag, interpreter):
     name = f'install-paper-{paper_version}-for-{python_tag}.pyz'
-    where = dst / 'dist' / name
-    create_archive(src, target=where, interpreter=interpreter)
+    where = dst / 'dist'
+    where.mkdir(parents=True, exist_ok=True)
+    create_archive(src, target=(where / name), interpreter=interpreter)
 
 
 def main(paper_version, rfbs_version, python_tag, interpreter):
