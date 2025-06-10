@@ -39,4 +39,4 @@ def unpack_wheel(src, dst):
         # That will leave behind the temporary directory for the context
         # manager to clean up, and avoid an extra folder at the destination.
         for item in Path(td).iterdir():
-            move(item, dst)
+            move(item, dst / item.name)
