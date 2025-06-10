@@ -1,43 +1,43 @@
 #!/usr/bin/env python
 
+from collections import namedtuple
 from pathlib import Path
 from shutil import copy as copyfile, copytree
 from tempfile import TemporaryDirectory
 from zipapp import create_archive
 
 
-def copy_wheel(src, dst, name, version, python_tag):
-    # Convert PyPI distribution name to wheel name-component.
-    name = name.replace('-', '_')
-    wheel_name = f'{name}-{version}-{python_tag}-none-any.whl'
+Versions = namedtuple('Versions', ('zipapp', 'paper', 'rfbs', 'python'))
+default_versions = Versions('0.1.0', '0.1.0', '0.1.0', 'py3-none-any')
+
+
+def copy_wheel(src, dst, name, version, tags):
+    wheel_name = f'{name}-{version}-{tags}.whl'
     dst.mkdir(exist_ok=True)
-    copyfile(src / wheel_name, dst / wheel_name)
+    copyfile(src / name / 'dist' / wheel_name, dst / wheel_name)
 
 
-def copy_wheels(src, dst, paper_version, rfbs_version, python_tag):
+def build_zipapp(src, dst, versions):
     copytree(src / 'bootstrap', dst, dirs_exist_ok=True)
-    copy_wheel(src / 'paper_ui' / 'dist', dst, 'paper-ui', paper_version, python_tag)
-    copy_wheel(src / 'rfbs' / 'dist', dst, 'rfbs', rfbs_version, python_tag)
-
-
-def build_zipapp(src, dst, paper_version, rfbs_version, python_tag):
-    copy_wheels(src, dst / 'wheels', paper_version, rfbs_version, python_tag)
+    copy_wheel(src, dst, 'paper_ui', versions.paper, versions.python)
+    copy_wheel(src, dst, 'rfbs', versions.rfbs, versions.python)
     copyfile(src / 'install.py', dst / '__main__.py')
 
 
-def write_zipapp(src, dst, paper_version, python_tag, interpreter):
-    name = f'install-paper-{paper_version}-for-{python_tag}.pyz'
+def write_zipapp(src, dst, versions, interpreter):
+    name = f'install-paper-{versions.zipapp}-for-{versions.python}.pyz'
     where = dst / 'dist'
     where.mkdir(parents=True, exist_ok=True)
     create_archive(src, target=(where / name), interpreter=interpreter)
 
 
-def main(paper_version, rfbs_version, python_tag, interpreter):
+def main(versions):
     here = Path(__file__).parent
-    with TemporaryDirectory() as env:
-        build_zipapp(here, Path(env), paper_version, rfbs_version, python_tag)
-        write_zipapp(Path(env), here, paper_version, python_tag, interpreter)
+    with TemporaryDirectory() as there:
+        there = Path(there)
+        build_zipapp(here, there, versions)
+        write_zipapp(there, here, versions, '/usr/bin/env python')
 
 
 if __name__ == '__main__':
-    main('0.1.0', '0.1.0', 'py3', '/usr/bin/env python')
+    main(default_versions)
