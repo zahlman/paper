@@ -111,7 +111,7 @@ def _make(env, base):
 def _check_python(versions, base_python):
     if base_python is None:
         return
-    if base_python.resolve() not in versions:
+    if Path(base_python).resolve() not in versions:
         raise EnvError("Environment exists, but doesn't include this Python")
 
 
