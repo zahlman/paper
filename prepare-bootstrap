@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+
+from pathlib import Path
+from shutil import rmtree
+
+from build import ProjectBuilder
+from rfbs.fetch import download
+
+bootstrap = Path('bootstrap')
+rmtree(bootstrap, ignore_errors=True)
+bootstrap.mkdir(parents=True, exist_ok=True)
+
+ProjectBuilder('rfbs').build('wheel', bootstrap)
+ProjectBuilder('paper_ui').build('wheel', bootstrap)
+download(bootstrap, 'packaging', '25.0', 'py3', 'none', 'any')
+download(bootstrap, 'resolvelib', '1.1.0', 'py2.py3', 'none', 'any')

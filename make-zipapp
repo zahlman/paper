@@ -11,16 +11,8 @@ Versions = namedtuple('Versions', ('zipapp', 'paper', 'rfbs', 'python'))
 default_versions = Versions('0.1.0', '0.1.0', '0.1.0', 'py3-none-any')
 
 
-def copy_wheel(src, dst, name, version, tags):
-    wheel_name = f'{name}-{version}-{tags}.whl'
-    dst.mkdir(exist_ok=True)
-    copyfile(src / name / 'dist' / wheel_name, dst / wheel_name)
-
-
 def build_zipapp(src, dst, versions):
     copytree(src / 'bootstrap', dst, dirs_exist_ok=True)
-    copy_wheel(src, dst, 'paper_ui', versions.paper, versions.python)
-    copy_wheel(src, dst, 'rfbs', versions.rfbs, versions.python)
     copyfile(src / 'install.py', dst / '__main__.py')
 
 
