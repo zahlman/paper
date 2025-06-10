@@ -1,5 +1,7 @@
 from pathlib import Path
 from shutil import copyfile
+from urllib.error import URLError
+
 from ..fetch import download
 from .unpack import unpack_wheel
 
@@ -37,17 +39,19 @@ def _folder_for(cache, name, version):
 
 
 def _tags():
-    # TODO
-    return ('py2.py3', 'none', 'any')
+    yield ('py2.py3', 'none', 'any')
+    yield ('py3', 'none', 'any')
 
 
-def _unpacked_wheel_path(folder, tags):
-    return folder / '-'.join(('wheel', *_tags()))
+def _unpacked_wheel_path(folder, tag):
+    return folder / '-'.join(('wheel', *tag))
 
 
 def _find_unpacked(folder, name, version):
-    candidate = _unpacked_wheel_path(folder, _tags())
-    return candidate if candidate.exists() else None
+    for tag in _tags():
+        candidate = _unpacked_wheel_path(folder, tag)
+        if candidate.exists():
+            return candidate
 
 
 def _wheel_name(name, version, tags):
@@ -55,17 +59,22 @@ def _wheel_name(name, version, tags):
 
 
 def _unpack_from_cache(folder, name, version):
-    # TODO: search for appropriate wheel tags
-    candidate = folder / _wheel_name(name, version, _tags())
-    if not candidate.exists():
-        return None
-    unpack_path = _unpacked_wheel_path(folder, _tags())
-    unpack_wheel(candidate, unpack_path)
-    return folder / unpack_path
+    # TODO: search for appropriate wheel tags properly
+    for tag in _tags():
+        candidate = folder / _wheel_name(name, version, tag)
+        if candidate.exists():
+            unpack_path = _unpacked_wheel_path(folder, tag)
+            unpack_wheel(candidate, unpack_path)
+            return folder / unpack_path
 
 
 def _fetch_then_unpack(folder, name, version):
-    download(folder, name, version, *_tags())
+    for tag in _tags():
+        # For now, try to get every variant and ignore failures.
+        try:
+            download(folder, name, version, *tag)
+        except URLError:
+            pass
     return _unpack_from_cache(folder, name, version)
 
 
