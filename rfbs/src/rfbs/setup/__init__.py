@@ -3,7 +3,9 @@ from shutil import copyfile
 from urllib.error import URLError
 
 from ..fetch import download
+from ..env import install_paths
 from .unpack import unpack_wheel
+from ._clone import visit
 
 
 def _copy_into(src, dst, force=False):
@@ -98,7 +100,13 @@ def _ensure_distribution(folder, name, version, fetch):
 
 
 def _setup_unpacked(distribution, root):
+    paths = install_paths(root)
     # hard-link main package files
+    visit(
+        lambda src, dst: dst.mkdir(exist_ok=True) or True,
+        lambda src, dst: dst.hardlink_to(src),
+        distribution, paths['purelib']
+    )
     # copy .dist-info and .data segments (they may need to be writable)
     # make script wrappers
     # invoke `compileall` as appropriate
